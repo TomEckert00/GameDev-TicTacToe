@@ -12,11 +12,14 @@ public class GameManager : MonoBehaviour
     public GameObject gameOverPanel;
     public Text gameOverText;
 
+    private int moveCount;
+
     void Awake()
     {
         SetGameControllerReferenceOnButtons();
         playerSide = "X";
         gameOverPanel.SetActive(false);
+        moveCount = 0;
     }
 
     public void SetGameControllerReferenceOnButtons()
@@ -36,6 +39,7 @@ public class GameManager : MonoBehaviour
 
     public void EndTurn()
     {
+        moveCount++;
         //Rows
         if (buttonList[0].text == playerSide && buttonList[1].text == playerSide && buttonList[2].text == playerSide)
         {
@@ -71,7 +75,16 @@ public class GameManager : MonoBehaviour
         {
             GameOver();
         }
+        if (moveCount >= 9)
+        {
+            SetGameOverText("It's a draw!");
+        }
         ChangeSides();
+    }
+
+    void ChangeSides()
+    {
+        playerSide = (playerSide == "X") ? "O" : "X";
     }
 
     void GameOver()
@@ -80,12 +93,13 @@ public class GameManager : MonoBehaviour
         {
             buttonList[i].GetComponentInParent<Button>().interactable = false;
         }
-        gameOverPanel.SetActive(true);
-        gameOverText.text = playerSide + " Wins!";
+        SetGameOverText(playerSide + " Wins!");
     }
 
-    void ChangeSides()
+
+    void SetGameOverText(string value)
     {
-        playerSide = (playerSide == "X") ? "O" : "X";
+        gameOverPanel.SetActive(true);
+        gameOverText.text = value;
     }
 }

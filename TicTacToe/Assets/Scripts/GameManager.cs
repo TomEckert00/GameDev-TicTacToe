@@ -1,14 +1,13 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Net.Http.Headers;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 [System.Serializable]
 public class Player
 {
     public Image panel;
     public Text text;
+    public Button button;
 }
 
 [System.Serializable]
@@ -20,28 +19,22 @@ public class PlayerColor
 
 public class GameManager : MonoBehaviour
 {
-    public Player playerX;
-    public Player playerO;
-
-    public PlayerColor activePlayerColor;
-    public PlayerColor inactivePlayerColor;
-    
     public Text[] buttonList;
-
-    private string playerSide;
-
     public GameObject gameOverPanel;
     public Text gameOverText;
-
-    private int moveCount;
-
     public GameObject restartButton;
+    public Player playerX;
+    public Player playerO;
+    public PlayerColor activePlayerColor;
+    public PlayerColor inactivePlayerColor;
+    public GameObject startInfo;
+    
+    private string playerSide;
+    private int moveCount;
 
     void Awake()
     {
         SetGameControllerReferenceOnButtons();
-        playerSide = "X";
-        SetPlayerColors(playerX, playerO);
         gameOverPanel.SetActive(false);
         moveCount = 0;
         restartButton.SetActive(false);
@@ -49,14 +42,31 @@ public class GameManager : MonoBehaviour
 
     public void SetGameControllerReferenceOnButtons()
     {
-        //foreach(Text button in buttonList)
-        for(int i = 0; i < buttonList.Length; i++)
+        for (int i = 0; i < buttonList.Length; i++)
         {
-            //button.SetGameControllerReference();
             buttonList[i].GetComponentInParent<GridSpace>().SetGameControllerReference(this);
         }
     }
+    public void SetStartingSide(string startingSide)
+    {
+        playerSide = startingSide;
+        if (playerSide == "X")
+        {
+            SetPlayerColors(playerX, playerO);
+        }
+        else
+        {
+            SetPlayerColors(playerO, playerX);
+        }
+        StartGame();
+    }
 
+    void StartGame()
+    {
+        SetBoardInteractable(true);
+        SetPlayerButton(false);
+        startInfo.SetActive(false);
+    }
     public string GetPlayerSide()
     {
         return playerSide;
@@ -123,12 +133,22 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void SetPlayerColors(Player newPlayer, Player oldPlayer)
+    {
+        newPlayer.panel.color = activePlayerColor.panelColor;
+        newPlayer.text.color = activePlayerColor.textColor;
+
+        oldPlayer.panel.color = inactivePlayerColor.panelColor;
+        oldPlayer.text.color = inactivePlayerColor.textColor;
+    }
+
     void GameOver(string winner)
     {
         SetBoardInteractable(false);
         if(winner == "draw")
         {
             SetGameOverText("It's a draw!");
+            SetPlayerColorsInactive();
         }
         else
         {
@@ -146,12 +166,12 @@ public class GameManager : MonoBehaviour
 
     public void RestartGame()
     {
-        playerSide = "X";
-        SetPlayerColors(playerX, playerO);
         moveCount = 0;
         gameOverPanel.SetActive(false);
         restartButton.SetActive(false);
-        SetBoardInteractable(true);
+        SetPlayerButton(true);
+        SetPlayerColorsInactive();
+        startInfo.SetActive(true);
 
         for (int i = 0; i < buttonList.Length; i++)
         {
@@ -166,13 +186,16 @@ public class GameManager : MonoBehaviour
             buttonList[i].GetComponentInParent<Button>().interactable = toggle;
         }
     }
-
-    public void SetPlayerColors(Player newPlayer, Player oldPlayer)
+    void SetPlayerButton(bool toggle)
     {
-        newPlayer.panel.color = activePlayerColor.panelColor;
-        newPlayer.text.color = activePlayerColor.textColor;
-       
-        oldPlayer.panel.color = inactivePlayerColor.panelColor;
-        oldPlayer.text.color = inactivePlayerColor.textColor;
+        playerX.button.interactable = toggle;
+        playerO.button.interactable = toggle;
+    }
+
+    void SetPlayerColorsInactive() { 
+        playerX.panel.color = inactivePlayerColor.panelColor;
+        playerX.text.color = inactivePlayerColor.textColor;
+        playerO.panel.color = inactivePlayerColor.panelColor;
+        playerO.text.color = inactivePlayerColor.textColor;
     }
 }
